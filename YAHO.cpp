@@ -125,7 +125,6 @@ int main(int argc,char **argv){
 		ext = wchk(s);
 		if (mapp>0 && ext && !kcs) cerr<<"genarating waste...\n";
 		if (mapp > 0 && ext && !kcs) wstgen(3,3,3);
-		//cout<<"*********"<<mapp<<"**********"<<endl;
 	} 
 	
 	cerr<<"All Done,Have Fun!"<<endl;
