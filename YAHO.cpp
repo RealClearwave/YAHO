@@ -1,9 +1,9 @@
-//yaho release 2.0 
+//yaho release 2.6 
 #include <bits/stdc++.h>
 using namespace std;
 
 int mapp = 0;
-
+bool ext;
 const string apha = "abcdefghijklmnopqrstuvwxyzl";
 const string aval = "11234567895";
 //waste gen
@@ -53,20 +53,11 @@ string wstif(){
 	return s;
 }
 
-void mset(string s){
-	for (int i=0;i<s.size();i++)
-		if (s[i] == '{')
-			mapp++;
-		else if (s[i] == '}')
-			mapp--;
-			
-	return;
-}
 
 void wstgen(int a,int b,int c){
 	for (int i=1;i<=rand()%a;i++) cout<<wstdim();
 	for (int i=1;i<=rand()%b;i++) cout<<wstfor();
-	//for (int i=1;i<=rand()%c;i++) cout<<wstif();
+	for (int i=1;i<=rand()%c;i++) cout<<wstif();
 }
 
 //~wstgen
@@ -95,6 +86,21 @@ string chkrem(string a){
 	return a;
 }
 
+bool wchk(string s){
+	for (int i=0;i<s.size();i++)
+	if (s[i] == '{')
+		mapp++;
+	else if (s[i] == '}')
+		mapp--;
+			
+	int len = s.length();
+	for (int i=0;i<len;i++){
+		if (i != len-1 && s[i] == 'i' && s[i+1] == 'f') return false;
+		if (i != len-1 && s[i] == 'd' && s[i+1] == 'o') return false;
+		if (i != len-2 && s[i] == 'f' && s[i+1] == 'o' && s[i+2] == 'r') return false;
+	}
+	return true;
+}
 int main(int argc,char **argv){
 	srand((unsigned)time(NULL));
 	if (argc != 3) {cout<<"Too many or too few arguments."<<endl;return 1;}
@@ -108,8 +114,8 @@ int main(int argc,char **argv){
 			s = chkrem(s);
 		}
 		cout<<s<<endl;
-		mset(s);
-		if (mapp > 0) wstgen(2,2,2);
+		ext = wchk(s);
+		if (mapp > 0 && ext) wstgen(2,2,2);
 		//cout<<"*********"<<mapp<<"**********"<<endl;
 	} 
 	
