@@ -1,4 +1,4 @@
-//yaho release 3.6
+//yaho release 3.9
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -8,9 +8,12 @@ int wnm = 3;
 
 int mapp = 0;
 bool ext,typ = false;
+const string opr = "+-";
 const string apha = "abcdefghijklmnopqrstuvwxyzl";
 const string aval = "11234567895";
 //waste gen
+//----------------------------------- 
+string eval(string s);
 string wstdim() {
 	string s,nam,val;
 	for (int i=1; i<=3+rand()%12; i++)
@@ -59,11 +62,23 @@ string wstif() {
 
 
 void wstgen(int a,int b,int c) {
-	for (int i=1; i<=rand()%a; i++) cout<<wstdim();
-	for (int i=1; i<=rand()%b; i++) cout<<wstfor();
-	for (int i=1; i<=rand()%c; i++) cout<<wstif();
+	for (int i=1; i<=rand()%a; i++) cout<<eval(wstdim());
+	for (int i=1; i<=rand()%b; i++) cout<<eval(wstfor());
+	for (int i=1; i<=rand()%c; i++) cout<<eval(wstif());
 }
 
+string wstexp() {
+	string s,v0,v1;
+	for (int i=1; i<=1+rand()%8; i++)
+		v0 += aval[rand()%10];
+
+	for (int i=1; i<=1+rand()%8; i++)
+		v1 += aval[rand()%10];
+
+	s = "(" + v0 + "-" + v0 + ")" + "*" + v1;
+
+	return s;
+}
 //~wstgen
 //string del(string s){
 //	int i=0;
@@ -75,6 +90,34 @@ void wstgen(int a,int b,int c) {
 //	}
 //	return s;
 //}
+//------------------------------------------------------ 
+
+//encoding
+string dspl(string s,int sd){ //beta
+	for (int i=1;i<=sd;i++) s = s + opr[rand()%2] + wstexp();
+	return s;
+}
+string eval(string s){
+	int eq = 0;while(eq <= s.length() && s[eq] != '=') eq++;
+	if (eq>s.length()) return s;
+	if (s[eq+1] == '=') eq++;
+	int depth = 0,len = 0;
+	while (eq+len < s.length() && !(len != 0 && depth == -1)){
+		len++;
+		if (s[eq+len] == '(')
+			depth++;
+		else if (s[eq+len] == ')' || s[eq+len] == ';')
+			depth--;
+	}
+	//cout<<eq<<' '<<len<<endl;
+	string k;
+	cerr<<"encoding "+s.substr(eq+1,len-1)+" ..."<<endl;
+	k = s.substr(0,eq+1) + dspl(s.substr(eq+1,len-1),rand()%wnm) + s.substr(eq+len,s.length()-(eq+len)+1);
+	return k;
+}
+//------------------------------------
+
+//simplify
 string chkhead(string a) {
 	int x = 0;
 	while (!((a[x]>='A' && a[x]<='Z') || (a[x]>='a' && a[x]<='z') || a[x] == '_' || a[x] == '#' || a[x] == '{' \
@@ -126,6 +169,9 @@ bool wchk(string s) {
 	}
 	return true;
 }
+//-----------------------------------------------
+
+
 int main(int argc,char **argv) {
 	srand((unsigned)time(NULL));
 	if (argc < 3) {
@@ -153,6 +199,7 @@ int main(int argc,char **argv) {
 		if (s != "") {
 			s = chkhead(s);
 			s = chkrem(s);
+			s = eval(s);
 			//s = del(s);
 		}
 		cout<<s<<endl;
