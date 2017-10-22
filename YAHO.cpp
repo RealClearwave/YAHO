@@ -1,9 +1,9 @@
-//yaho release 3.9
+//yaho release 4.0
 #include <bits/stdc++.h>
 using namespace std;
 
 //args
-bool kcs = false;
+bool kcs = false,nev = false;
 int wnm = 3;
 
 int mapp = 0;
@@ -62,9 +62,9 @@ string wstif() {
 
 
 void wstgen(int a,int b,int c) {
-	for (int i=1; i<=rand()%a; i++) cout<<eval(wstdim());
-	for (int i=1; i<=rand()%b; i++) cout<<eval(wstfor());
-	for (int i=1; i<=rand()%c; i++) cout<<eval(wstif());
+	for (int i=1; i<=rand()%a; i++) cout<<(nev?wstdim():eval(wstdim()));
+	for (int i=1; i<=rand()%b; i++) cout<<(nev?wstfor():eval(wstfor()));
+	for (int i=1; i<=rand()%c; i++) cout<<(nev?wstif():eval(wstif()));
 }
 
 string wstexp() {
@@ -121,7 +121,7 @@ string eval(string s){
 string chkhead(string a) {
 	int x = 0;
 	while (!((a[x]>='A' && a[x]<='Z') || (a[x]>='a' && a[x]<='z') || a[x] == '_' || a[x] == '#' || a[x] == '{' \
-	         || a[x] == '/' || a[x] == '}' || a[x] == '\t') && x < a.size()) {
+	         || a[x] == '/' || a[x] == '}' || a[x] == '\t' || (a[x] == '+' && a[x+1] == '+') || (a[x] == '-' && a[x+1] == '-')) && x < a.size()) {
 		a[x] = ' ';
 		x++;
 	}
@@ -163,9 +163,13 @@ bool wchk(string s) {
 	if (s[hd+0] == 'c' && s[hd+1] == 'l' && s[hd+2] == 'a' && s[hd+3] == 's' && s[hd+4] == 's') typ = true;
 	if (s[hd+0] == 's' && s[hd+1] == 't' && s[hd+2] == 'r' && s[hd+3] == 'u' && s[hd+4] == 'c' && s[hd+5] == 't') typ = true;
 	for (int i=0; i<len; i++) {
+		if (i < len	  && s[i] == '}') return false;
 		if (i < len-1 && s[i] == 'i' && s[i+1] == 'f') return false;
 		if (i < len-1 && s[i] == 'd' && s[i+1] == 'o') return false;
 		if (i < len-2 && s[i] == 'f' && s[i+1] == 'o' && s[i+2] == 'r') return false;
+		if (i < len-4 && s[i] == 'w' && s[i+1] == 'h' && s[i+2] == 'i' && s[i+3] == 'l' && s[i+4] == 'e') return false;
+		if (i < len-3 && s[i] == 'e' && s[i+1] == 'l' && s[i+2] == 's' && s[i+3] == 'e') return false;
+		if (i < len-5 && s[i] == 's' && s[i+1] == 'w' && s[i+2] == 'i' && s[i+3] == 't' && s[i+4] == 'c' && s[i+5] == 'h') return false;
 	}
 	return true;
 }
@@ -190,6 +194,9 @@ int main(int argc,char **argv) {
 			} else if (!strcmp(argv[i-1],"-s")) {
 				wnm += 2;
 				cerr<<"Running in Super Mode with number of wastes "<<wnm<<"."<<endl;
+			}else if (!strcmp(argv[i-1],"-ne")) {
+				nev = true;
+				cerr<<"Running in None-eval Mode."<<endl;
 			}
 		}
 	}
@@ -199,7 +206,7 @@ int main(int argc,char **argv) {
 		if (s != "") {
 			s = chkhead(s);
 			s = chkrem(s);
-			s = eval(s);
+			if (!nev) s = eval(s);
 			//s = del(s);
 		}
 		cout<<s<<endl;
