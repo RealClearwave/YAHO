@@ -192,12 +192,17 @@ int main(int argc,char **argv) {
 				kcs = true;
 				cerr<<"Running in KCS Mode."<<endl;
 			} else if (!strcmp(argv[i-1],"-s")) {
-				wnm += 2;
+                int wplus = argv[i]-'0';
+                if(wplus>=0&&wplus<=9)wnm += argv[i]-'0';
+                else wnm+=2;
 				cerr<<"Running in Super Mode with number of wastes "<<wnm<<"."<<endl;
 			}else if (!strcmp(argv[i-1],"-ne")) {
 				nev = true;
 				cerr<<"Running in None-eval Mode."<<endl;
-			}
+            }else if (!strcmp(argv[i-1],"-cl")) {
+                nev = true,kcs = true;
+                cerr<<"Running in No-Comment-LineNo Only Mode."<<endl;
+            }
 		}
 	}
 	string s;
@@ -217,8 +222,15 @@ int main(int argc,char **argv) {
 	}
 	fclose(stdin);
 	fclose(stdout);
-	cerr<<"Calling Astyle..."<<endl;
+	cerr<<"Calling Astyle/clang-format..."<<endl;
+#ifdef __WIN32__
 	string t = string("astyle\\bin\\astyle.exe ") + argv[2];
+#else
+#ifdef __APPLE__
+	string t = string("./clang-format/bin/clang-format -i ") + argv[2];
+#else
+	cerr<<"Sorry, but linux is not currently supported!"<<endl;
+#endif
 	system(t.c_str());
 	cerr<<"All Done,Have Fun!"<<endl;
 	return 0;
