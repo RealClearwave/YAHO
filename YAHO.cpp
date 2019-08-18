@@ -13,6 +13,7 @@ const string apha = "abcdefghijklmnopqrstuvwxyzl";
 const string aval = "11234567895";
 //waste gen
 //----------------------------------- 
+
 string eval(string s);
 string wstdim() {
 	string s,nam,val;
@@ -179,7 +180,19 @@ bool wchk(string s) {
 int main(int argc,char **argv) {
 	srand((unsigned)time(NULL));
 	if (argc < 3) {
-		cerr<<"Too few arguments."<<endl;
+		if(!strcmp(argv[0],"-h")){
+			cerr<<R "(YAHO <source file> <target file> [options]
+
+YAHO <源代码> <目标文件> [设置]
+
+设置 Options:
+[-k]          don't generate waste but add spaghetti numbers                        卡常数模式
+
+[-s <swm>]    super mode (Spaghetti Code Multiplier+swm,defaulted to +2)            超级模式（随机加花代码+swm，默认+2）
+
+[-ne]         only remove comments and line numbers                                 不添加随机加花代码)"
+		}
+		cerr<<"Not enough arguments."<<endl;
 		return 1;
 	}else
 		cerr<<"Argc is "<<argc<<endl;
@@ -229,8 +242,18 @@ int main(int argc,char **argv) {
 #ifdef __APPLE__
 	string t = string("./clang-format/bin/clang-format -i ") + argv[2];
 #else
-	cerr<<"Sorry, but linux is not currently supported!"<<endl;
+#include <sys/stat.h>
+#include <unistd.h>
+#include <string>
+#include <fstream>
+	string t = string("./astyle ") + argv[2];
+	struct stat buffer;
+	system("cd astylel/build/gcc/bin")
+	if(!stat("astyle", &buffer))goto end;
+	cerr<<"Please wait while we build AStyle!"<<endl;
+	system("cd .. && make && cd bin");
 #endif
+end:
 	system(t.c_str());
 	cerr<<"All Done,Have Fun!"<<endl;
 	return 0;
