@@ -1,9 +1,28 @@
 //yaho release 4.0
-#include <bits/stdc++.h>
+#include <iostream>
+#include <cstdio>
+#ifdef __APPLE__
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <array>
+std::string exec(const char* cmd) {
+    std::array<char, 128> buffer;
+    std::string result;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) {
+        throw std::runtime_error("popen() failed!");
+    }
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+        result += buffer.data();
+    }
+    return result;
+}
+#endif
 using namespace std;
-
+bool debug = false;
 //args
-bool kcs = false,nev = false;
+bool kcs(0), nev(0);
 int wnm = 3;
 
 int mapp = 0;
@@ -14,7 +33,6 @@ const string aval = "11234567895";
 //waste gen
 //----------------------------------- 
 
-string eval(string s);
 string wstdim() {
 	string s,nam,val;
 	for (int i=1; i<=3+rand()%12; i++)
@@ -61,13 +79,6 @@ string wstif() {
 	return s;
 }
 
-
-void wstgen(int a,int b,int c) {
-	for (int i=1; i<=rand()%a; i++) cout<<(nev?wstdim():eval(wstdim()));
-	for (int i=1; i<=rand()%b; i++) cout<<(nev?wstfor():eval(wstfor()));
-	for (int i=1; i<=rand()%c; i++) cout<<(nev?wstif():eval(wstif()));
-}
-
 string wstexp() {
 	string s,v0,v1;
 	for (int i=1; i<=1+rand()%8; i++)
@@ -112,11 +123,17 @@ string eval(string s){
 	}
 	//cout<<eq<<' '<<len<<endl;
 	string k;
-	cerr<<"encoding "+s.substr(eq+1,len-1)+" ..."<<endl;
+	if(debug)cerr<<"encoding "+s.substr(eq+1,len-1)+" ..."<<endl;
 	k = s.substr(0,eq+1) + dspl(s.substr(eq+1,len-1),rand()%wnm) + s.substr(eq+len,s.length()-(eq+len)+1);
 	return k;
 }
 //------------------------------------
+
+void wstgen(int a,int b,int c) {
+	for (int i=1; i<=rand()%a; i++) cout<<(nev?wstdim():eval(wstdim()));
+	for (int i=1; i<=rand()%b; i++) cout<<(nev?wstfor():eval(wstfor()));
+	for (int i=1; i<=rand()%c; i++) cout<<(nev?wstif():eval(wstif()));
+}
 
 //simplify
 string chkhead(string a) {
@@ -159,8 +176,8 @@ bool wchk(string s) {
 	if (mapp == 0) typ = false;
 	int len = s.length();
 	int hd = 0;while(s[hd] == ' ') hd++;
-	//cerr<<typ<<endl;
-	//cerr<<s[hd+0]<<s[hd+1]<<s[hd+2]<<s[hd+3]<<s[hd+4]<<s[hd+5]<<endl;
+	//if(debug)cerr<<typ<<endl;
+	//if(debug)cerr<<s[hd+0]<<s[hd+1]<<s[hd+2]<<s[hd+3]<<s[hd+4]<<s[hd+5]<<endl;
 	if (s[hd+0] == 'c' && s[hd+1] == 'l' && s[hd+2] == 'a' && s[hd+3] == 's' && s[hd+4] == 's') typ = true;
 	if (s[hd+0] == 's' && s[hd+1] == 't' && s[hd+2] == 'r' && s[hd+3] == 'u' && s[hd+4] == 'c' && s[hd+5] == 't') typ = true;
 	for (int i=0; i<len; i++) {
@@ -181,46 +198,64 @@ int main(int argc,char **argv) {
 	srand((unsigned)time(NULL));
 	if (argc < 3) {
 		if(!strcmp(argv[0],"-h")){
-			cerr<<R "(YAHO <source file> <target file> [options]
+			cerr<<R"(
+Yet Another Helper for Olers
 
+语法 Usage:
+YAHO <source file> <target file> [options]
 YAHO <源代码> <目标文件> [设置]
 
 设置 Options:
-[-k]          don't generate waste but add spaghetti numbers                        卡常数模式
+[-k][--kcs] 						don't generate waste but add spaghetti numbers                        卡常数模式（不添加随机变量）
 
-[-s <swm>]    super mode (Spaghetti Code Multiplier+swm,defaulted to +2)            超级模式（随机加花代码+swm，默认+2）
+[-s <swm>][--super <swm>]			super mode (Spaghetti Code Multiplier+swm,defaulted to +2)            超级模式（随机加花代码+swm，默认+2）
 
-[-ne]         only remove comments and line numbers                                 不添加随机加花代码)"
+[-ne][--no-eval]					don't generate spaghetti numbers but add waste                        不将常数（-INT_MAX~INT_MAX）加花
+
+[-cl]								only remove comments and line numbers								  不添加随机加花代码
+
+[-d][--debug]						debug mode with process and argument information                      输出微妙的运行程度与数据
+
+[-h][--help]						brings up this screen with usage and options						  输出这个页面
+
+注意事项 Caveats:
+Currently if you're on macOS or linux you need to put the clang-format/astyle folder in the same directory as where this executable is
+being executed from.
+目前，如果您在macOS或Linux上，您需要将clang-format或astyle文件夹放在与执行此可执行文件的目录相同的目录中。)";
+			return 0;
 		}
 		cerr<<"Not enough arguments."<<endl;
 		return 1;
-	}else
-		cerr<<"Argc is "<<argc<<endl;
+	}
 	freopen(argv[1],"r",stdin);
 	freopen(argv[2],"w",stdout);
 
 	if (argc >= 4) {
 		for (int i=4; i<=argc; i++) {
-			if (!strcmp(argv[i-1],"-k")) {
+			if (!strcmp(argv[i-1],"-k")||!strcmp(argv[i-1],"--kcs")) {
 				kcs = true;
 				cerr<<"Running in KCS Mode."<<endl;
-			} else if (!strcmp(argv[i-1],"-s")) {
-                int wplus = argv[i]-'0';
-                if(wplus>=0&&wplus<=9)wnm += argv[i]-'0';
+			} else if (!strcmp(argv[i-1],"-s")||!strcmp(argv[i-1],"--super")) {
+				int wplus = *argv[i]-'0';
+                if(wplus>=0&&wplus<=9)wnm += *argv[i]-'0';
                 else wnm+=2;
 				cerr<<"Running in Super Mode with number of wastes "<<wnm<<"."<<endl;
-			}else if (!strcmp(argv[i-1],"-ne")) {
+			}else if (!strcmp(argv[i-1],"-ne")||!strcmp(argv[i-1],"--no-eval")) {
 				nev = true;
-				cerr<<"Running in None-eval Mode."<<endl;
+				cerr<<"Running in No-eval Mode."<<endl;
             }else if (!strcmp(argv[i-1],"-cl")) {
                 nev = true,kcs = true;
                 cerr<<"Running in No-Comment-LineNo Only Mode."<<endl;
+            }else if (!strcmp(argv[i-1],"-d")||!strcmp(argv[i-1],"--debug")){
+            	debug = true;
+            	cerr<<"Runnig with debugging info."<<endl;
             }
 		}
 	}
+	if(debug)cerr<<"Number of arguments: "<<argc<<endl;
 	string s;
 	while (getline(cin,s)) {
-		cerr<<"processing "<<s<<" ...\n";
+		if(debug)cerr<<"processing "<<s<<" ...\n";
 		if (s != "") {
 			s = chkhead(s);
 			s = chkrem(s);
@@ -229,7 +264,7 @@ YAHO <源代码> <目标文件> [设置]
 		}
 		cout<<s<<endl;
 		ext = wchk(s);
-		if (mapp>0 && ext && !kcs && !typ) cerr<<"genarating waste...\n";
+		if (mapp>0 && ext && !kcs && !typ && debug) cerr<<"genarating waste...\n";
 		if (mapp > 0 && ext && !kcs && !typ) wstgen(wnm,wnm,wnm);
 		//cout<<"*********"<<mapp<<"**********"<<endl;
 	}
@@ -248,13 +283,15 @@ YAHO <源代码> <目标文件> [设置]
 #include <fstream>
 	string t = string("./astyle ") + argv[2];
 	struct stat buffer;
-	system("cd astylel/build/gcc/bin")
+	system("cd astyle/build/gcc/bin")
 	if(!stat("astyle", &buffer))goto end;
 	cerr<<"Please wait while we build AStyle!"<<endl;
-	system("cd .. && make && cd bin");
+	if(debug)system("cd .. && make -d && cd bin");
+	else system("cd .. && make && cd bin");
+#endif
 #endif
 end:
 	system(t.c_str());
 	cerr<<"All Done,Have Fun!"<<endl;
-	return 0;
+return 0;
 }
